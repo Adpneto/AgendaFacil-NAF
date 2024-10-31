@@ -197,13 +197,12 @@ export default function EditProfile({ isDialogOpen, setIsDialogOpen }: EditProfi
                 </div>
               </div>
             </div>
-          </DialogContent>
           <DialogFooter className='flex justify-between gap-2'>
-            <p className='text-xs text-zinc-500'>Faça alterações em seu perfil aqui. Clique em salvar quando terminar.</p>
             <Button onClick={handleProfileUpdate} disabled={isUpdating}>
               {isUpdating ? "Salvando..." : "Salvar alterações"}
             </Button>
           </DialogFooter>
+          </DialogContent>
         </DialogContent>
       )}
     </Dialog>

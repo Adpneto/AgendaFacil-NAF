@@ -52,7 +52,11 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 })
 
-export default function Register() {
+interface RegisterProps {
+  onRegisterSuccess: () => void
+}
+
+export default function Register({ onRegisterSuccess }: RegisterProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -80,7 +84,7 @@ export default function Register() {
         cpf: data.cpf,
       }, { merge: true })
 
-      console.log("Deu bom")
+      onRegisterSuccess()
       reset()
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {

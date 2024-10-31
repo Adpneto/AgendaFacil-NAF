@@ -6,7 +6,6 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { auth } from '../../firebaseConfig'
-import { useNavigate } from 'react-router-dom'
 
 const formSchema = z.object({
   email: z.string()
@@ -16,8 +15,11 @@ const formSchema = z.object({
     .nonempty({ message: "Senha é obrigatória" }),
 })
 
-export default function Login() {
-  const navigate = useNavigate()
+interface LoginProps {
+  setIsSignOpen: (open: boolean) => void; // Nova prop
+}
+
+export default function Login({ setIsSignOpen }: LoginProps) {
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -31,7 +33,7 @@ export default function Login() {
   const handleLogin = async (data: { email: string; password: string }) => {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password)
-      navigate('/')
+      setIsSignOpen(false)
     } catch (error: any) {
       if (error.code === "auth/invalid-credential") {
         form.setError("password", {

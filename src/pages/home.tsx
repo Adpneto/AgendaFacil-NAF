@@ -1,4 +1,6 @@
+import ScheduleAppointment from "@/components/auth/scheduling"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 export default function Home() {
 
@@ -55,6 +57,8 @@ export default function Home() {
     }
   ]
 
+  const [isSchedulingOpen, setIsSchedulingOpen] = useState<boolean>(false)
+
   return (
     <div className='flex flex-col items-center m-5'>
       <div className='text-center'>
@@ -73,8 +77,15 @@ export default function Home() {
         <div className="flex flex-col gap-2 items-center lg:w-[35%]">
           <h1 className="font-bold text-2xl text-center">Agende sua Consulta conosco!</h1>
           <h2>Agendar sua consulta conosco é simples e rápido. Escolha o serviço de que você precisa, selecione a data e o horário disponíveis que melhor se adequam à sua agenda e preencha as informações necessárias. Estamos ansiosos para ajudá-lo a resolver suas questões financeiras.</h2>
-          <Button className="bg-[#006b64] lg:w-[30%]">Agendar</Button>
+          <Button className="bg-[#006b64] lg:w-[30%]" onClick={() => setIsSchedulingOpen(true)}>Agendar</Button>
         </div>
+
+        {isSchedulingOpen && (
+          <ScheduleAppointment
+            isSchedulingOpen={isSchedulingOpen}
+            setIsSchedulingOpen={setIsSchedulingOpen}
+          />
+        )}
         <div className="flex flex-col gap-2 items-center lg:w-[35%]">
           <h1 className="font-bold text-2xl text-center">Fale Conosco</h1>
           <h2>Agendar sua consulta conosco é simples e rápido. Escolha o serviço de que você precisa, selecione a data e o horário disponíveis que melhor se adequam à sua agenda e preencha as informações necessárias. Estamos ansiosos para ajudá-lo a resolver suas questões financeiras.</h2>

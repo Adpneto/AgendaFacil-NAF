@@ -28,7 +28,7 @@ export default function Sign({ isSignOpen, setIsSignOpen }: Props) {
 						<div className='w-full flex flex-col items-center z-10'>
 							<img src="img/logo.png" alt="Logo da unifeso" className='w-[250px] pb-10' />
 							<h1 className="text-3xl font-bold">Entrar</h1>
-							<Login />
+							<Login setIsSignOpen={setIsSignOpen} />
 							<p className="underline underline-offset-2 cursor-pointer"
 								onClick={toggleForm}>
 								Ainda não tem conta? Vamos criar uma então!
@@ -42,7 +42,7 @@ export default function Sign({ isSignOpen, setIsSignOpen }: Props) {
 						style={{ pointerEvents: !showLogin ? 'auto' : 'none' }}>
 						<div className='w-full flex flex-col items-center z-10'>
 							<h1 className="text-3xl font-bold">Registre-se</h1>
-							<Register />
+							<Register onRegisterSuccess={toggleForm} />
 							<p className="underline underline-offset-2 cursor-pointer"
 								onClick={toggleForm}>
 								Já tem conta? Vamos logar então!
