@@ -12,8 +12,6 @@ interface Props {
 
 function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
   const [userData, setUserData] = useState<UserData | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [isUpdating, setIsUpdating] = useState<boolean>(false)
   const [appointmentId, setAppointmentId] = useState<string | null>(null)
   const [appointmentDetails, setAppointmentDetails] = useState<{ date: string; time: string } | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -29,7 +27,6 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     } else {
       console.error('Usuário não encontrado no Firestore.')
     }
-    setIsLoading(false)
   }
 
   const fetchUserAppointments = async (userId: string) => {
@@ -52,7 +49,6 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
         await fetchUserAppointments(user.uid)
       } else {
         setUserData(null)
-        setIsLoading(false)
         console.log('Nenhum usuário autenticado.')
       }
     })
@@ -116,7 +112,6 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
 
   const handleAppointment = async () => {
     if (!selectedDate || !selectedSlot) return
-    setIsUpdating(true)
 
     if (auth.currentUser) {
       const appointmentRef = doc(collection(db, 'appointments'))
@@ -129,7 +124,6 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     }
 
     alert('Agendamento realizado com sucesso!')
-    setIsUpdating(false)
     setSelectedDate(null)
     setSelectedSlot(null)
     setIsSchedulingOpen(false)
@@ -145,7 +139,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
   }
 
   const formatDateForDisplay = (dateString: string) => {
-    const [year, month, day] = dateString.split('-')
+    const [, month, day] = dateString.split('-')
     return `${day}/${month}`
   }
 
@@ -155,8 +149,8 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
       const today = new Date()
       const currentHour = today.getHours()
       // Define the first available weekday
-      const firstAvailableDay = weekdays[0]; // O primeiro dia útil da lista
-      handleDateSelect(currentHour >= 17 ? weekdays[1] : firstAvailableDay);
+      const firstAvailableDay = weekdays[0] // O primeiro dia útil da lista
+      handleDateSelect(currentHour >= 17 ? weekdays[1] : firstAvailableDay)
     }
   }, [isSchedulingOpen])
 

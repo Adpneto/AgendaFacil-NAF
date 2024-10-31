@@ -89,25 +89,25 @@ export default function Register() {
           message: "Este email já está registrado.",
         })
       } else {
-        console.log("Erro ao criar usuário:", error);
+        console.log("Erro ao criar usuário:", error)
       }
     }
   }
 
   const formatCPF = (value: any) => {
-    const cleaned = ('' + value).replace(/\D/g, '');
-    const match = cleaned.match(/(\d{3})(\d{3})(\d{3})(\d{2})/);
+    const cleaned = ('' + value).replace(/\D/g, '')
+    const match = cleaned.match(/(\d{3})(\d{3})(\d{3})(\d{2})/)
     if (match) {
-      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
+      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`
     }
-    return value;
+    return value
   }
 
   const formatPhoneNumber = (value: any) => {
-    const cleaned = ('' + value).replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
+    const cleaned = ('' + value).replace(/\D/g, '')
+    const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/)
     if (match) {
-      return `(${match[1]}) ${match[2]}-${match[3]}`;
+      return `(${match[1]}) ${match[2]}-${match[3]}`
     }
     return value
   }
@@ -153,8 +153,8 @@ export default function Register() {
                     placeholder="Número (00) 00000-0000"
                     value={field.value}
                     onChange={(e) => {
-                      const formattedValue = formatPhoneNumber(e.target.value);
-                      field.onChange(formattedValue);
+                      const formattedValue = formatPhoneNumber(e.target.value)
+                      field.onChange(formattedValue)
                     }}
                   />
                 </FormControl>

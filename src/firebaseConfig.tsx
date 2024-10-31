@@ -28,20 +28,20 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider")
   }
   return context
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence)
       .then(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
           setCurrentUser(user)
-        });
+        })
         return () => unsubscribe()
       })
       .catch((error) => {
