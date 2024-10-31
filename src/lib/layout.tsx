@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
 import { auth } from "@/firebaseConfig";
 import { onAuthStateChanged } from 'firebase/auth';
+import Footer from '@/components/footer';
+import Header from '@/components/header';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
@@ -26,10 +28,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <>
           <main className="w-full">
             <ModeToggle />
-            <div className="w-full flex justify-center">
-              <div className="w-[1440px] m-5">
+            <div className="w-full flex flex-col items-center">
+                <Header/>
                 {children}
-              </div>
+                <Footer/>
             </div>
           </main>
         </>
@@ -37,10 +39,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <>
           <main className="w-full">
             <ModeToggle />
-            <div className="w-full flex justify-center">
-              <div className="w-full">
+            <div className="w-full flex flex-col items-center">
+                <Header/>
                 {children}
-              </div>
+                <Footer/>
             </div>
           </main>
         </>
