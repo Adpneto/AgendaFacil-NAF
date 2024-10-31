@@ -31,7 +31,7 @@ export default function Login() {
   const handleLogin = async (data: { email: string; password: string }) => {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password)
-      navigate('/home')
+      navigate('/')
     } catch (error: any) {
       if (error.code === "auth/invalid-credential") {
         form.setError("password", {

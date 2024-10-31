@@ -56,14 +56,14 @@ export default function Home() {
   ]
 
   return (
-    <div className='lg:w-[1440px] flex flex-col items-center m-5'>
-      <div className='text-center lg:w-[60%]'>
+    <div className='flex flex-col items-center m-5'>
+      <div className='text-center'>
         <h1 className='text-xl lg:text-4xl font-bold'>Núcleo de Apoio Contábil e Fiscal</h1>
         <h2 className='lg:text-2xl'>Simplificando suas obrigações fiscais com agendamento online fácil.</h2>
         <h3 className='font-light pt-2'>Bem-vindo ao NAF Online, onde tornamos mais simples do que nunca obter ajuda com suas declarações de Imposto de Renda e outros serviços financeiros. Nosso processo de agendamento rápido e conveniente está pronto para atendê-lo. Reserve sua consulta hoje e coloque suas finanças em ordem.</h3>
       </div>
 
-      <div className='w-full flex gap-2 m-5'>
+      <div className='flex gap-2 m-5'>
         <img className='w-[33%]' src="img/img1.jpeg" />
         <img className='w-[33%]' src="img/img2.jpg" />
         <img className='w-[33%]' src="img/img3.jpeg" />
@@ -82,7 +82,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className='mt-5 w-full grid gap-5 justify-items-center items-center grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-5'>
+      <div className='mt-5 grid gap-5 justify-items-center items-center grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-5'>
         {Servicos.map((serv) =>
           <div className='flex flex-col items-center text-center' key={serv.id}>
             <h2 className='text-lg font-bold'>{serv.title}</h2>

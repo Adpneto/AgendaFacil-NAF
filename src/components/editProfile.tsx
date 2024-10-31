@@ -149,48 +149,55 @@ export default function EditProfile({ isDialogOpen, setIsDialogOpen }: EditProfi
             <DialogTitle className='hidden'>Edição de Perfil</DialogTitle>
             <DialogDescription className='hidden'>Faça alterações em seu perfil aqui. Clique em salvar quando terminar.</DialogDescription>
           </DialogHeader>
-          <div className="gap-4 py-4 flex flex-col justify-center items-center">
-            <div className="relative group">
-              {tempUserData?.profilePicture ? (
-                <img src={tempUserData.profilePicture} alt="Foto de Perfil" className="rounded-full w-40 h-40 cursor-pointer object-cover" onClick={() => fileInputRef.current?.click()} />
-              ) : (
-                <User className="bg-purple-900 p-2 rounded-full w-40 h-40 text-white" onClick={() => fileInputRef.current?.click()} />
-              )}
-              <Edit className="absolute inset-0 m-auto w-6 h-6 text-white opacity-0 group-hover:opacity-100 cursor-pointer" onClick={() => fileInputRef.current?.click()} />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </div>
-            <div>
-              <Label htmlFor="name">Nome</Label>
-              <div className='flex gap-2'>
+          <DialogContent>
+            <div className="gap-4 py-4 flex flex-col justify-center items-center">
+              <div className="relative group">
+                {tempUserData?.profilePicture ? (
+                  <img src={tempUserData.profilePicture} alt="Foto de Perfil" className="rounded-full w-40 h-40 cursor-pointer object-cover" onClick={() => fileInputRef.current?.click()} />
+                ) : (
+                  <User className="bg-purple-900 p-2 rounded-full w-40 h-40 text-white" onClick={() => fileInputRef.current?.click()} />
+                )}
+                <Edit className="absolute inset-0 m-auto w-6 h-6 text-white opacity-0 group-hover:opacity-100 cursor-pointer" onClick={() => fileInputRef.current?.click()} />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
+              <div className='flex flex-col gap-2'>
+                <Label htmlFor="name">Nome Completo</Label>
                 <Input
                   id="name"
                   value={tempUserData?.name || ''}
                   className="w-full"
                   onChange={(e) => handleChange('name', e.target.value)}
                 />
-                <Input
-                  id="surname"
-                  value={tempUserData?.surname || ''}
-                  className="w-full"
-                  onChange={(e) => handleChange('surname', e.target.value)}
-                />
+                <div className='flex gap-2'>
+                  <div>
+                    <Label htmlFor="name">CPF</Label>
+                    <Input
+                      disabled
+                      id="cpf"
+                      value={tempUserData?.cpf || ''}
+                      className="w-full"
+                      onChange={(e) => handleChange('name', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="name">Numero de Telefone</Label>
+                    <Input
+                      id="phone_number"
+                      value={tempUserData?.phone_number || ''}
+                      className="w-full"
+                      onChange={(e) => handleChange('phone_number', e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="username">Nome de Usuario</Label>
-              <Input
-                id="username"
-                value={tempUserData?.username || ''}
-                onChange={(e) => handleChange('username', e.target.value)}
-              />
-            </div>
-          </div>
+          </DialogContent>
           <DialogFooter className='flex justify-between gap-2'>
             <p className='text-xs text-zinc-500'>Faça alterações em seu perfil aqui. Clique em salvar quando terminar.</p>
             <Button onClick={handleProfileUpdate} disabled={isUpdating}>

@@ -18,14 +18,8 @@ import { UserData } from "@/interfaces/UserData"
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}\-\d{2}$/
 const phoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/
-const dateRegex = /^\d{4}-\d{2}-\d{2}$/
 
 const formSchema = z.object({
-  username: z.string()
-    .min(3, { message: "O nome de usuário deve ter pelo menos 3 caracteres" })
-    .max(20, { message: "O nome de usuário pode ter no máximo 20 caracteres" })
-    .nonempty({ message: "Nome de usuário é obrigatório" }),
-
   email: z.string()
     .email({ message: "Formato de email inválido" })
     .nonempty({ message: "Email é obrigatório" }),
@@ -34,11 +28,6 @@ const formSchema = z.object({
     .min(2, { message: "O nome deve ter pelo menos 2 caracteres" })
     .regex(/^[a-zA-Z\s]+$/, { message: "O nome deve conter apenas letras" })
     .nonempty({ message: "Nome é obrigatório" }),
-
-  surname: z.string()
-    .min(2, { message: "O sobrenome deve ter pelo menos 2 caracteres" })
-    .regex(/^[a-zA-Z\s]+$/, { message: "O sobrenome deve conter apenas letras" })
-    .nonempty({ message: "Sobrenome é obrigatório" }),
 
   phone_number: z.string()
     .regex(phoneRegex, { message: "Telefone inválido, o formato correto é (XX) XXXXX-XXXX" })
@@ -58,10 +47,6 @@ const formSchema = z.object({
   cpf: z.string()
     .regex(cpfRegex, { message: "CPF inválido, o formato correto é XXX.XXX.XXX-XX" })
     .nonempty({ message: "CPF é obrigatório" }),
-
-  dayOfBirth: z.string()
-    .regex(dateRegex, { message: "Data de nascimento inválida. O formato correto é AAAA-MM-DD" })
-    .nonempty({ message: "Data de nascimento é obrigatória" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não correspondem",
   path: ["confirmPassword"],
@@ -71,15 +56,12 @@ export default function Register() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
       email: '',
       name: '',
-      surname: '',
       phone_number: '',
       password: '',
       confirmPassword: '',
-      cpf: '',
-      dayOfBirth: ''
+      cpf: ''
     },
   })
 
@@ -92,11 +74,8 @@ export default function Register() {
       const userDocRef = doc(db, 'users', user.uid)
 
       await setDoc(userDocRef, {
-        username: data.username,
         email: data.email,
-        dayOfBirth: data.dayOfBirth,
         name: data.name,
-        surname: data.surname,
         phone_number: data.phone_number,
         cpf: data.cpf,
       }, { merge: true })
@@ -138,94 +117,25 @@ export default function Register() {
       <form onSubmit={form.handleSubmit(handleRegister)} className="space-y-2 m-5 w-full">
         <FormField
           control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Nome Completo</FormLabel>
+              <FormControl>
+                <Input placeholder="Nome" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="email@email.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-2">
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Senha</FormLabel>
-                <FormControl>
-                  <Input placeholder="Senha" type="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Comfirme a senha</FormLabel>
-                <FormControl>
-                  <Input placeholder="Comfirme a senha" type="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome de Usuario</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome de Usuario" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-2 w-full">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Primeiro Nome</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nome" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="surname"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Sobrenome</FormLabel>
-                <FormControl>
-                  <Input placeholder="Sobrenome" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="dayOfBirth"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data de nascimento</FormLabel>
-              <FormControl>
-                <Input placeholder="Data de nascimento" type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -272,6 +182,35 @@ export default function Register() {
             )}
           />
         </div>
+        <div className="flex gap-2">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Senha</FormLabel>
+                <FormControl>
+                  <Input placeholder="Senha" type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Comfirme a senha</FormLabel>
+                <FormControl>
+                  <Input placeholder="Comfirme a senha" type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
         <Button type='submit' variant='outline' className='w-full'>
           Registrar
         </Button>
