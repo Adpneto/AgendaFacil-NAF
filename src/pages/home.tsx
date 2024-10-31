@@ -1,6 +1,9 @@
 import ScheduleAppointment from "@/components/auth/scheduling"
+import Sign from "@/components/auth/sign"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { auth } from "@/firebaseConfig"
+import { onAuthStateChanged } from "firebase/auth"
+import { useEffect, useState } from "react"
 
 export default function Home() {
 
@@ -58,6 +61,23 @@ export default function Home() {
   ]
 
   const [isSchedulingOpen, setIsSchedulingOpen] = useState<boolean>(false)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
+  const [isSignOpen, setIsSignOpen] = useState<boolean>(false)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user) 
+    })
+    return () => unsubscribe() 
+  }, [])
+
+  const handleScheduleClick = () => {
+    if (isLoggedIn) {
+      setIsSchedulingOpen(true)
+    } else {
+      setIsSignOpen(true)
+    }
+  }
 
   return (
     <div className='flex flex-col items-center m-5'>
@@ -77,19 +97,13 @@ export default function Home() {
         <div className="flex flex-col gap-2 items-center lg:w-[35%]">
           <h1 className="font-bold text-2xl text-center">Agende sua Consulta conosco!</h1>
           <h2>Agendar sua consulta conosco é simples e rápido. Escolha o serviço de que você precisa, selecione a data e o horário disponíveis que melhor se adequam à sua agenda e preencha as informações necessárias. Estamos ansiosos para ajudá-lo a resolver suas questões financeiras.</h2>
-          <Button className="bg-[#006b64] lg:w-[30%]" onClick={() => setIsSchedulingOpen(true)}>Agendar</Button>
+          <Button className="bg-[#006b64] lg:w-[30%] text-white" onClick={handleScheduleClick}>Agendar</Button>
         </div>
 
-        {isSchedulingOpen && (
-          <ScheduleAppointment
-            isSchedulingOpen={isSchedulingOpen}
-            setIsSchedulingOpen={setIsSchedulingOpen}
-          />
-        )}
         <div className="flex flex-col gap-2 items-center lg:w-[35%]">
           <h1 className="font-bold text-2xl text-center">Fale Conosco</h1>
           <h2>Agendar sua consulta conosco é simples e rápido. Escolha o serviço de que você precisa, selecione a data e o horário disponíveis que melhor se adequam à sua agenda e preencha as informações necessárias. Estamos ansiosos para ajudá-lo a resolver suas questões financeiras.</h2>
-          <Button className="bg-[#006b64] lg:w-[30%]">Entrar em contato</Button>
+          <Button className="bg-[#006b64] lg:w-[30%] text-white">Entrar em contato</Button>
         </div>
       </div>
 
@@ -100,6 +114,19 @@ export default function Home() {
             <h3 className='text-left font-light'>{serv.text}</h3>
           </div>)}
       </div>
+      {isSignOpen && (
+          <Sign
+            isSignOpen={isSignOpen}
+            setIsSignOpen={setIsSignOpen}
+          />
+        )}
+
+        {isSchedulingOpen && (
+          <ScheduleAppointment
+            isSchedulingOpen={isSchedulingOpen}
+            setIsSchedulingOpen={setIsSchedulingOpen}
+          />
+        )}
     </div>
   )
 }

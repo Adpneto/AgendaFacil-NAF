@@ -105,7 +105,7 @@ export default function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={() => setIsSignOpen(true)} variant={'outline'}>Entrar</Button>
+          <Button className='bg-gray-600 border-none' onClick={() => setIsSignOpen(true)} variant={'outline'}>Entrar</Button>
         )}
 
         {/* Renderiza apenas se o Dialog correspondente estiver aberto */}
