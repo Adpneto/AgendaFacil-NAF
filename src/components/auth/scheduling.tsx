@@ -13,7 +13,7 @@ interface Props {
 function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [appointmentId, setAppointmentId] = useState<string | null>(null)
-  const [appointmentDetails, setAppointmentDetails] = useState<{ date: string; time: string } | null>(null)
+  const [appointmentDetails, setAppointmentDetails] = useState<{ date: string; time: string; userId: string } | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [reservedSlots, setReservedSlots] = useState<string[]>([])
@@ -23,14 +23,15 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     const userDocRef = doc(db, 'users', userId)
     const userDocSnap = await getDoc(userDocRef)
     if (userDocSnap.exists()) {
-      setUserData(userDocSnap.data() as UserData)
+      const userData = userDocSnap.data() as UserData
+      setUserData(userData)
     } else {
       console.error('Usuário não encontrado no Firestore.')
     }
   }
 
-  const fetchUserAppointments = async (userId: string) => {
-    const q = query(collection(db, 'appointments'), where('userId', '==', userId))
+  const fetchUserAppointments = async (cpf: string) => {
+    const q = query(collection(db, 'appointments'), where('cpf', '==', cpf))
     const querySnapshot = await getDocs(q)
     if (!querySnapshot.empty) {
       const appointment = querySnapshot.docs[0]
@@ -38,6 +39,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
       setAppointmentDetails({
         date: appointment.data().date,
         time: appointment.data().time,
+        userId: appointment.data().userId,
       })
     }
   }
@@ -46,21 +48,22 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         await loadUserData(user.uid)
-        await fetchUserAppointments(user.uid)
+        if (userData?.cpf) {
+          await fetchUserAppointments(userData.cpf)
+        }
       } else {
         setUserData(null)
         console.log('Nenhum usuário autenticado.')
       }
     })
     return () => unsubscribe()
-  }, [])
+  }, [userData])
 
   const getWeekdays = () => {
     const days = []
     const today = new Date()
     const currentHour = today.getHours()
 
-    // Definir o dia inicial
     if (currentHour >= 17) {
       today.setDate(today.getDate() + 1)
     }
@@ -69,7 +72,6 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
       const day = new Date(today)
       day.setDate(today.getDate() + i)
 
-      // Pula finais de semana
       if (day.getDay() === 0 || day.getDay() === 6) continue
       days.push(day.toISOString().split('T')[0])
     }
@@ -99,10 +101,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
 
   const fetchReservedSlots = async (date: string) => {
     const reserved: string[] = []
-    const q = query(
-      collection(db, 'appointments'),
-      where('date', '==', date)
-    )
+    const q = query(collection(db, 'appointments'), where('date', '==', date))
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach((doc) => {
       reserved.push(doc.data().time)
@@ -116,10 +115,13 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     if (auth.currentUser) {
       const appointmentRef = doc(collection(db, 'appointments'))
       await setDoc(appointmentRef, {
+        name: userData?.name,
+        email: userData?.email,
+        cpf: userData?.cpf,
         date: selectedDate,
         time: selectedSlot,
         userId: auth.currentUser.uid,
-        status: 'reservado',
+        status: 'pendente',
       })
     }
 
@@ -150,8 +152,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
       const weekdays = getWeekdays()
       const today = new Date()
       const currentHour = today.getHours()
-      // Define the first available weekday
-      const firstAvailableDay = weekdays[0] // O primeiro dia útil da lista
+      const firstAvailableDay = weekdays[0]
       handleDateSelect(currentHour >= 17 ? weekdays[1] : firstAvailableDay)
     }
   }, [isSchedulingOpen])
@@ -161,7 +162,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
       {appointmentId && appointmentDetails ? (
         <DialogContent className='flex flex-col'>
           <DialogHeader>
-            <DialogTitle>Informeções sobre sua consulta</DialogTitle>
+            <DialogTitle>Informações sobre sua consulta</DialogTitle>
             <DialogDescription />
           </DialogHeader>
           <div className='flex flex-col'>
@@ -222,13 +223,8 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
             </>
           </div>
           <DialogFooter>
-            <Button
-              onClick={handleAppointment}
-              variant="default"
-              className="mt-4"
-              disabled={!selectedSlot}
-            >
-              Confirmar Agendamento
+            <Button onClick={handleAppointment} variant="default" disabled={!selectedSlot}>
+              Agendar
             </Button>
           </DialogFooter>
         </DialogContent>
