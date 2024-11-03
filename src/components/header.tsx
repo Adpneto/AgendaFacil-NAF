@@ -71,7 +71,7 @@ export default function Header() {
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-10 w-10 rounded-full">
                     {user.profilePicture ? (
-                      <AvatarImage className='rounded-full' src={user.profilePicture} alt={user.name} />
+                      <AvatarImage className='rounded-lg' src={user.profilePicture} alt={user.name} />
                     ) : (
                       <AvatarFallback className="rounded-full"><User /></AvatarFallback>
                     )}

@@ -5,4 +5,5 @@ export interface UserData {
     phone_number?: string
     profilePicture?: string
     cpf?: string
+    isAdmin?: boolean
 }
