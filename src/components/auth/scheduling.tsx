@@ -5,6 +5,7 @@ import { Button } from '../ui/button'
 import { UserData } from '@/interfaces/UserData'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 import sendEmail from '@/services/notifications/emailService'
+import { useToast } from '@/hooks/use-toast'
 interface Props {
   isSchedulingOpen: boolean
   setIsSchedulingOpen: (open: boolean) => void
@@ -18,6 +19,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [reservedSlots, setReservedSlots] = useState<string[]>([])
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const loadUserData = async (userId: string) => {
     const userDocRef = doc(db, 'users', userId)
@@ -124,23 +126,40 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
         status: 'pendente',
       })
     }
-
-    alert('Agendamento realizado com sucesso!')
-    sendEmail(userData?.email!, userData?.name!, selectedDate, true)
+    await toast({
+      title: `Agendamento feito com sucesso!`,
+      description: `Sua consulta será ${selectedDate} as ${selectedSlot}, chegue com 10 minutos de antecedencia!`
+    })
+    sendEmail(userData?.email!, userData?.name!, selectedDate, selectedSlot, "sucesso")
     setSelectedDate(null)
     setSelectedSlot(null)
     setIsSchedulingOpen(false)
   }
 
   const handleCancelAppointment = async () => {
-    if (appointmentId) {
-      await deleteDoc(doc(db, 'appointments', appointmentId))
-      alert('Agendamento cancelado com sucesso!')
-      sendEmail(userData?.email!, userData?.name!, appointmentDetails!.date, false)
-      setAppointmentId(null)
-      setAppointmentDetails(null)
+    try {
+      if (appointmentId) {
+        await deleteDoc(doc(db, 'appointments', appointmentId))
+        await toast({
+          title: "Agendamento cancelado com sucesso!, já te notificamos por email!"
+        })
+        if (appointmentDetails) {
+          sendEmail(userData?.email!, userData?.name!, appointmentDetails.date, appointmentDetails.time, "cancelado")
+        } else {
+          console.error('Detalhes do agendamento não disponíveis para envio de e-mail.')
+        }
+        setAppointmentId(null)
+        setAppointmentDetails(null)
+      }
+    } catch (error) {
+      await toast({
+        title: "Ocorreu um erro ao cancelar o agendamento. Tente novamente.",
+        variant: 'destructive'
+      })
     }
   }
+
+
 
   const formatDateForDisplay = (dateString: string) => {
     const [, month, day] = dateString.split('-')

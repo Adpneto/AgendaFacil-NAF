@@ -6,6 +6,7 @@ import { AuthProvider } from './firebaseConfig.tsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 import Layout from './lib/layout.tsx'
+import { Toaster } from './components/ui/toaster.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <Layout children={<App />} />
+          <Toaster />
         </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>

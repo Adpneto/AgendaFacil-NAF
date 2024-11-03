@@ -8,7 +8,7 @@ import { AvatarFallback, AvatarImage } from './ui/avatar'
 import EditProfile from './editProfile'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { Button } from './ui/button'
-import { BadgeCheck, Bell, Calendar, LogOut, User } from 'lucide-react'
+import { BadgeCheck, Calendar, LogOut, User, UserCog } from 'lucide-react'
 import Sign from '@/components/auth/sign'
 import ScheduleAppointment from './auth/scheduling'
 
@@ -31,6 +31,7 @@ export default function Header() {
             name: userDoc.data().name,
             surname: userDoc.data().surname,
             profilePicture: userDoc.data().profilePicture || null,
+            isAdmin: userDoc.data().isAdmin || false, // Adicione o campo isAdmin
           })
         }
       } else {
@@ -43,6 +44,10 @@ export default function Header() {
   function logOut() {
     auth.signOut()
     navigate('/')
+  }
+
+  function adminPage() {
+    navigate('/admin')
   }
 
   return (
@@ -92,10 +97,12 @@ export default function Header() {
                   <Calendar />
                   Agendamentos
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Bell />
-                  Notificações
-                </DropdownMenuItem>
+                {user.isAdmin && (
+                  <DropdownMenuItem onClick={adminPage}>
+                    <UserCog />
+                    Administração
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logOut}>

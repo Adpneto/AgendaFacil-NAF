@@ -42,7 +42,7 @@ export default function Sign({ isSignOpen, setIsSignOpen }: Props) {
 						style={{ pointerEvents: !showLogin ? 'auto' : 'none' }}>
 						<div className='w-full flex flex-col items-center z-10'>
 							<h1 className="text-3xl font-bold">Registre-se</h1>
-							<Register onRegisterSuccess={toggleForm} />
+							<Register setIsSignOpen={setIsSignOpen}/>
 							<p className="underline underline-offset-2 cursor-pointer"
 								onClick={toggleForm}>
 								Já tem conta? Vamos logar então!

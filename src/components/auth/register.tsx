@@ -15,6 +15,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth"
 import { auth, db } from "@/firebaseConfig"
 import { doc, setDoc } from "firebase/firestore"
 import { UserData } from "@/interfaces/UserData"
+import { sendEmailSign } from "@/services/notifications/emailService"
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}\-\d{2}$/
 const phoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/
@@ -52,11 +53,11 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 })
 
-interface RegisterProps {
-  onRegisterSuccess: () => void
+interface DialogProps {
+  setIsSignOpen: (open: boolean) => void
 }
 
-export default function Register({ onRegisterSuccess }: RegisterProps) {
+export default function Register({ setIsSignOpen }: DialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,9 +83,10 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
         name: data.name,
         phone_number: data.phone_number,
         cpf: data.cpf,
+        isAdmin: false
       }, { merge: true })
-
-      onRegisterSuccess()
+      sendEmailSign(data.email, data.name!, 'registrado')
+      setIsSignOpen(false)
       reset()
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {

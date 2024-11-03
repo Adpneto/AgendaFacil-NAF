@@ -16,7 +16,7 @@ const formSchema = z.object({
 })
 
 interface LoginProps {
-  setIsSignOpen: (open: boolean) => void; // Nova prop
+  setIsSignOpen: (open: boolean) => void
 }
 
 export default function Login({ setIsSignOpen }: LoginProps) {

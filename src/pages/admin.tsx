@@ -1,20 +1,12 @@
 import { useEffect, useState } from "react"
 import { collection, getDocs, query, where, addDoc, deleteDoc, doc, Timestamp } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { db } from "@/firebaseConfig"
-
-type Appointment = {
-  id: string
-  name: string
-  email: string
-  cpf: string
-  date: string
-  time: string
-  userID?: string
-  status?: string
-}
+import sendEmail from "@/services/notifications/emailService"
+import { useToast } from "@/hooks/use-toast"
+import { Appointment } from "@/interfaces/AppointmentData"
 
 export default function AdminAppointments() {
   const [selectedDayAppointments, setSelectedDayAppointments] = useState<Appointment[]>([])
@@ -25,6 +17,7 @@ export default function AdminAppointments() {
   const [reservedSlots, setReservedSlots] = useState<string[]>([])
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const { toast } = useToast()
 
   const [newAppointment, setNewAppointment] = useState({
     name: "",
@@ -45,28 +38,23 @@ export default function AdminAppointments() {
 
   const deleteExpiredAppointments = async () => {
     const today = new Date()
-    
-    // Formata a data atual para comparação
     const formattedToday = today.toISOString().split('T')[0]
-  
-    // Consulta para pegar todos os appointments com data anterior à data atual
     const q = query(collection(db, 'appointments'), where('date', '<', formattedToday))
     const querySnapshot = await getDocs(q)
-  
+
     querySnapshot.forEach(async (appointment) => {
       await deleteDoc(doc(db, 'appointments', appointment.id))
       console.log(`Horarios expirados, foram apagados do banco de dados.`)
     })
-  
-    // Verifica se há horários que já passaram no dia atual
+
     const currentHour = today.getHours()
     const qToday = query(
       collection(db, 'appointments'),
       where('date', '==', formattedToday)
     )
-    
+
     const todaySnapshot = await getDocs(qToday)
-    
+
     todaySnapshot.forEach(async (appointment) => {
       const appointmentTime = parseInt(appointment.data().time.split(':')[0], 10)
       if (appointmentTime < currentHour) {
@@ -75,7 +63,7 @@ export default function AdminAppointments() {
       }
     })
   }
-  
+
   const getWeekdays = () => {
     const days = []
     const today = new Date()
@@ -92,7 +80,6 @@ export default function AdminAppointments() {
       if (day.getDay() === 0 || day.getDay() === 6) continue
       days.push(day.toISOString().split('T')[0])
     }
-
     return days
   }
 
@@ -105,7 +92,6 @@ export default function AdminAppointments() {
     for (let hour = startHour; hour < 17; hour++) {
       slots.push(`${hour}:00`)
     }
-
     return slots
   }
 
@@ -136,11 +122,11 @@ export default function AdminAppointments() {
     const appointment = selectedDayAppointments.find(appt => appt.time === slot)
     if (appointment) {
       setSelectedAppointment(appointment)
-      setIsEditing(false) // Abre o dialog de visualização se já houver um agendamento
+      setIsEditing(false) 
     } else {
       setSelectedAppointment(null)
       setNewAppointment({ ...newAppointment, date: selectedDate, time: slot })
-      setIsEditing(true) // Abre o dialog para agendar se o slot estiver vago
+      setIsEditing(true) 
     }
     setSelectedSlot(slot)
     setIsDialogOpen(true)
@@ -153,33 +139,55 @@ export default function AdminAppointments() {
         where("email", "==", newAppointment.email)
       )
       const userSnapshot = await getDocs(userQuery)
-  
+
       let userID: string | null = null
       let notifyEmail = false
-  
+
       if (!userSnapshot.empty) {
         userID = userSnapshot.docs[0].id
+        sendEmail(newAppointment?.email!, newAppointment?.name!, newAppointment!.date, selectedSlot!, "admin")
+        await toast({
+          title: "Agendamento feito com sucesso!.",
+          description: `${newAppointment.name} terá sua consulta as ${newAppointment.time} de ${newAppointment.date}, já foi notificado por email!`
+        })
       } else {
-        notifyEmail = true // Marca o agendamento para enviar e-mail posteriormente
+        notifyEmail = true
+        await toast({
+          title: "Agendamento feito com sucesso!.",
+          description: `${newAppointment.name} terá sua consulta as ${newAppointment.time} de ${newAppointment.date}, o CPF não estava cadastrado, então enviamos um email com orientações!`
+        })
+        sendEmail(newAppointment?.email!, newAppointment?.name!, newAppointment!.date, selectedSlot!, "sucessoSemConta")
       }
-  
+
       await addDoc(collection(db, "appointments"), {
         ...newAppointment,
         userID: userID,
-        notifyEmail, 
+        notifyEmail,
         createdAt: Timestamp.now()
       })
       setIsDialogOpen(false)
     } else {
       alert("Preencha todos os campos obrigatórios!")
     }
-  }  
+  }
+
+  const prepareCancelAppointment = async (appointment: Appointment) => {
+    const { email, name, date, time } = appointment
+    console.log("Cancelamento de agendamento:", email, name, date, time)
+    sendEmail(email, name, date, time, "adminCancelado")
+    await handleCancelAppointment(appointment.id);
+  };
 
   const handleCancelAppointment = async (appointmentId: string) => {
     await deleteDoc(doc(db, "appointments", appointmentId))
-    fetchReservedSlots(selectedDate) // Atualiza a lista de horários reservados
+    fetchReservedSlots(selectedDate)
     setIsDialogOpen(false)
-  }
+    toast({
+      title: "Agendamento cancelado",
+      description: "O agendamento foi cancelado e o cliente foi notificado.",
+    });
+  };
+
 
   const formatDateForDisplay = (dateString: string) => {
     const [, month, day] = dateString.split('-')
@@ -196,7 +204,7 @@ export default function AdminAppointments() {
   }
 
   return (
-    <div className="p-5 flex flex-col h-screen w-[900px]">
+    <div className="p-5 flex flex-col items-center justify-center h-[747px] w-full">
       <h1 className="text-2xl font-bold mb-4">Administração de Agendamentos</h1>
 
       <div className="flex flex-col gap-2">
@@ -229,11 +237,11 @@ export default function AdminAppointments() {
           </>
         )}
       </div>
-
-      {/* Dialog para exibir ou adicionar agendamentos */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
+            <DialogTitle />
+            <DialogDescription />
             {isEditing ? (
               <h2 className="text-lg font-semibold">Novo Agendamento - {selectedDate}</h2>
             ) : (
@@ -273,7 +281,10 @@ export default function AdminAppointments() {
                 <p><strong>Hora:</strong> {selectedAppointment.time}</p>
                 <p><strong>Status:</strong> {selectedAppointment.status || "pendente"}</p>
                 <DialogFooter>
-                  <Button variant="destructive" onClick={() => handleCancelAppointment(selectedAppointment.id)}>
+                  <Button
+                    variant="destructive"
+                    onClick={() => selectedAppointment && prepareCancelAppointment(selectedAppointment)}
+                  >
                     Cancelar Agendamento
                   </Button>
                 </DialogFooter>
