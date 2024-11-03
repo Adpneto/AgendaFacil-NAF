@@ -17,7 +17,6 @@ type Appointment = {
 }
 
 export default function AdminAppointments() {
-  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [selectedDayAppointments, setSelectedDayAppointments] = useState<Appointment[]>([])
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -37,23 +36,12 @@ export default function AdminAppointments() {
   })
 
   useEffect(() => {
-    fetchAppointments()
     deleteExpiredAppointments()
     const weekdays = getWeekdays()
     if (weekdays.length > 0) {
       handleDateSelect(weekdays[0])
     }
   }, [])
-
-  const fetchAppointments = async () => {
-    const appointmentsCollection = collection(db, "appointments")
-    const appointmentsSnapshot = await getDocs(appointmentsCollection)
-    const appointmentsList = appointmentsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Appointment[]
-    setAppointments(appointmentsList)
-  }
 
   const deleteExpiredAppointments = async () => {
     const today = new Date()
@@ -181,8 +169,6 @@ export default function AdminAppointments() {
         notifyEmail, 
         createdAt: Timestamp.now()
       })
-  
-      fetchAppointments()
       setIsDialogOpen(false)
     } else {
       alert("Preencha todos os campos obrigatórios!")
@@ -191,7 +177,6 @@ export default function AdminAppointments() {
 
   const handleCancelAppointment = async (appointmentId: string) => {
     await deleteDoc(doc(db, "appointments", appointmentId))
-    fetchAppointments()
     fetchReservedSlots(selectedDate) // Atualiza a lista de horários reservados
     setIsDialogOpen(false)
   }
@@ -199,6 +184,15 @@ export default function AdminAppointments() {
   const formatDateForDisplay = (dateString: string) => {
     const [, month, day] = dateString.split('-')
     return `${day}/${month}`
+  }
+
+  const formatCPF = (value: any) => {
+    const cleaned = ('' + value).replace(/\D/g, '')
+    const match = cleaned.match(/(\d{3})(\d{3})(\d{3})(\d{2})/)
+    if (match) {
+      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`
+    }
+    return value
   }
 
   return (
@@ -264,7 +258,7 @@ export default function AdminAppointments() {
                 type="text"
                 placeholder="CPF"
                 value={newAppointment.cpf}
-                onChange={(e) => setNewAppointment({ ...newAppointment, cpf: e.target.value })}
+                onChange={(e) => setNewAppointment({ ...newAppointment, cpf: formatCPF(e.target.value) })}
               />
               <DialogFooter>
                 <Button onClick={handleAddAppointment}>Salvar Agendamento</Button>
