@@ -4,7 +4,7 @@ import { doc, setDoc, getDocs, collection, query, where, getDoc, deleteDoc } fro
 import { Button } from '../ui/button'
 import { UserData } from '@/interfaces/UserData'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
-
+import sendEmail from '@/services/notifications/emailService'
 interface Props {
   isSchedulingOpen: boolean
   setIsSchedulingOpen: (open: boolean) => void
@@ -124,6 +124,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     }
 
     alert('Agendamento realizado com sucesso!')
+    sendEmail(userData?.email!, userData?.name!, selectedDate, true)
     setSelectedDate(null)
     setSelectedSlot(null)
     setIsSchedulingOpen(false)
@@ -133,6 +134,7 @@ function ScheduleAppointment({ isSchedulingOpen, setIsSchedulingOpen }: Props) {
     if (appointmentId) {
       await deleteDoc(doc(db, 'appointments', appointmentId))
       alert('Agendamento cancelado com sucesso!')
+      sendEmail(userData?.email!, userData?.name!, appointmentDetails!.date, false)
       setAppointmentId(null)
       setAppointmentDetails(null)
     }
